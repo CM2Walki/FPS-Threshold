@@ -2,7 +2,7 @@
 #include <regex>
 
 // How often are we going to write out our results
-#define FILE_WRITE_TIME_SECONDS 500
+#define FILE_WRITE_TIME_SECONDS 300
 
 public Plugin myinfo =
 {
@@ -17,11 +17,6 @@ public Plugin myinfo =
 float g_fpsarr[FILE_WRITE_TIME_SECONDS];
 int g_timestamps[FILE_WRITE_TIME_SECONDS];
 
-// Array to copy to before writing to file (I/O is async), 
-// because underlying the other arrays will already have new data being written to
-float write_arr_fps[FILE_WRITE_TIME_SECONDS];
-int write_arr_timestamp[FILE_WRITE_TIME_SECONDS];
-
 int g_current_index = 0;
 
 File g_file_hndl;
@@ -29,11 +24,12 @@ Regex g_regex_hndl;
 
 public OnPluginStart()
 {
-	// Open handle to file
+    // Open handle to file
     g_file_hndl = OpenFile("serverbenchmark-data.txt", "w");
-	// Precompile Regex
+    // Precompile Regex
     g_regex_hndl = CompileRegex("(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)");
-    CreateTimer(1.0, logfps, 0, TIMER_REPEAT);
+    CreateTimer(1.0, CollectFPS, 0, TIMER_REPEAT);
+    CreateTimer(float(FILE_WRITE_TIME_SECONDS), WriteBenchmarkTimerAction, 0, TIMER_REPEAT);
 }
 
 public OnPluginEnd()
@@ -42,36 +38,32 @@ public OnPluginEnd()
     CloseHandle(g_regex_hndl);
 }
 
-public Action:logfps(Handle:timer)
+public Action:CollectFPS(Handle:timer)
 {
-	g_fpsarr[g_current_index] = GetFPS();
-	g_timestamps[g_current_index] = GetTime();
+    g_fpsarr[g_current_index] = GetFPS();
+    g_timestamps[g_current_index] = GetTime();
 
-	// Increment index, also used to determine if we need to write the data to file
-	g_current_index++;
+    // Increment index, also used to determine if we need to write the data to file
+    g_current_index++;
 
-	if (g_current_index >= FILE_WRITE_TIME_SECONDS)
-	{
-		// Reset to beginning of array
-		g_current_index = 0;
-		
-		// Write data to file array
-		for(int i = 0; i < FILE_WRITE_TIME_SECONDS; i++)
-		{
-			write_arr_fps[i] = g_fpsarr[i];
-			write_arr_timestamp[i] = g_timestamps[i];
-		}
-		
-		// Write data to file
-		WriteBenchmarkData();
-	}
+    if (g_current_index >= FILE_WRITE_TIME_SECONDS)
+    {
+        // Reset to beginning of array
+        g_current_index = 0;
+    }
+}
+
+public Action:WriteBenchmarkTimerAction(Handle:timer)
+{
+    // Write data to file
+    WriteBenchmarkData();
 }
 
 public void WriteBenchmarkData()
 {
     for(int i = 0; i < FILE_WRITE_TIME_SECONDS; i++)
     {
-        WriteFileLine(g_file_hndl, "%i %f", write_arr_timestamp[i], write_arr_fps[i]);
+        WriteFileLine(g_file_hndl, "%i %f", g_timestamps[i], g_fpsarr[i]);
     }
 }
 
@@ -87,9 +79,9 @@ public float GetFPS()
     if (subCount < 10)
     {
         // not enough matches
-		// Example what we want to match (CSGO, stats command):
-		//   CPU   NetIn   NetOut    Uptime  Maps   FPS   Players  Svms    +-ms   ~tick
-		//   10.0  10744.8  37350.5       4     1  127.50      20    4.48    0.96    0.02
+        // Example what we want to match (CSGO, stats command):
+        //   CPU   NetIn   NetOut    Uptime  Maps   FPS   Players  Svms    +-ms   ~tick
+        //   10.0  10744.8  37350.5       4     1  127.50      20    4.48    0.96    0.02
         return -1.0;
     }
 
