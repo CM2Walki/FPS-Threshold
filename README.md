@@ -1,30 +1,7 @@
-# FPS Threshold
+# Server FPS Recorder
 ## Description
-A simple SourceMod plugin that calculates the server FPS every second and when it goes under a certain threshold based off of the average FPS in *x* seconds, offers a forward on detection,
-
-I've made this in hopes to mitigate damage on [Elite Hunterz](https://forum.elite-hunterz.com/)'s Zombie Hunting server from poor performance issues when multiple players are stuck inside of each other.
-
-## ConVars
-* **sm_fpsth_avgtime** - Calculate the average FPS for *x* seconds (*x* representing the CVar value).
-* **sm_fpsth_threshold** - If the average FPS goes below this average, call `FPSTH_OnDetect()` forward.
-
-## Forwards
-This plugin comes with one forward to allow other plugins to interact. The forward may be found below.
-
-```C
-/**
- * Called when the server is caught going under the average FPS threshold.
- *
- * @param avgfps The average FPS detected.
- * @param curfps The current FPS detected.
- * 
- * @return void
- */
-forward void FPSTH_OnDetect(float avgfps, int curfps);
-```
-
-## Useful Plugins
-* [Force Noblock](https://github.com/gamemann/FPS-Threshold-Noblock) - Forces Noblock on all players when average FPS goes under threshold.
+A simple SourceMod plugin that saves the server fps for a CS:GO server every second using a regex and the `stats` command. After 500 seconds it outputs it to `csgo/serverbenchmark-data.txt` in the format `unix_timestamp fps_this_second`.
 
 ## Credits
-* [Christian Deacon](https://github.com/gamemann)
+* [Walentin Lamonos](https://github.com/CM2Walki) (fork)
+* [Christian Deacon](https://github.com/gamemann) (gamemann/FPS-Threshold)
