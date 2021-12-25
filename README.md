@@ -1,30 +1,29 @@
-# FPS Threshold
+# Server FPS Recorder
 ## Description
-A simple SourceMod plugin that calculates the server FPS every second and when it goes under a certain threshold based off of the average FPS in *x* seconds, offers a forward on detection,
+A simple SourceMod plugin that saves the server fps for a CS:GO server every second using a regex and the `stats` command. After 500 seconds it outputs it to `csgo/serverbenchmark-data.txt` in the format:
 
-I've made this in hopes to mitigate damage on [Elite Hunterz](https://forum.elite-hunterz.com/)'s Zombie Hunting server from poor performance issues when multiple players are stuck inside of each other.
+```unix_timestamp fps_this_second```
 
-## ConVars
-* **sm_fpsth_avgtime** - Calculate the average FPS for *x* seconds (*x* representing the CVar value).
-* **sm_fpsth_threshold** - If the average FPS goes below this average, call `FPSTH_OnDetect()` forward.
-
-## Forwards
-This plugin comes with one forward to allow other plugins to interact. The forward may be found below.
-
-```C
-/**
- * Called when the server is caught going under the average FPS threshold.
- *
- * @param avgfps The average FPS detected.
- * @param curfps The current FPS detected.
- * 
- * @return void
- */
-forward void FPSTH_OnDetect(float avgfps, int curfps);
+### Example:
+```
+1640434765 127.389999
+1640434766 127.989997
+1640434767 128.039993
+1640434768 127.989997
+1640434769 128.119995
+1640434770 128.009994
+1640434771 128.059997
+1640434772 128.059997
+1640434773 127.989997
+1640434774 128.220001
+1640434775 127.910003
+1640434776 128.059997
 ```
 
-## Useful Plugins
-* [Force Noblock](https://github.com/gamemann/FPS-Threshold-Noblock) - Forces Noblock on all players when average FPS goes under threshold.
+Can then be visualized using Google spreadsheets like this:
+
+![image](https://cm2.network/csgo/Server%20FPS%20-%2020%20Bots.png)
 
 ## Credits
-* [Christian Deacon](https://github.com/gamemann)
+* [Walentin Lamonos](https://github.com/CM2Walki) (fork)
+* [Christian Deacon](https://github.com/gamemann) (gamemann/FPS-Threshold)
