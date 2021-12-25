@@ -83,9 +83,7 @@ public float GetFPS()
     ServerCommandEx(buffer, sizeof(buffer), "stats");
 
     new subCount = MatchRegex(g_regex_hndl, buffer);
-	
-    PrintToServer(buffer);
-    
+
     if (subCount < 10)
     {
         // not enough matches
